@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Minus, Target, TrendingUp, Flame, Trophy, ChevronDown, ChevronUp, Trash2, Settings, X, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Minus, Target, TrendingUp, Flame, Trophy, ChevronDown, ChevronUp, Trash2, Settings, X, Calendar, ChevronLeft, ChevronRight, Clock, Share2 } from 'lucide-react';
 
 export default function App() {
   const [yearlyGoal, setYearlyGoal] = useState(20000);
@@ -13,6 +13,8 @@ export default function App() {
   const [backlogCount, setBacklogCount] = useState(0);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [activeTab, setActiveTab] = useState('today');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const shareCardRef = useRef(null);
 
   const today = new Date().toISOString().split('T')[0];
   const currentYear = new Date().getFullYear();
@@ -171,6 +173,34 @@ export default function App() {
     setCalendarMonth(newDate);
   };
 
+  // Share functionality
+  const handleShare = async () => {
+    const shareText = `💪 OnlyPushups Progress\n\n🎯 ${totalThisYear.toLocaleString()} / ${yearlyGoal.toLocaleString()} pushups\n📊 ${progress.toFixed(1)}% complete\n🔥 ${streak} day streak\n📅 ${yearEntries.length} days active\n\nTrack your pushups at: pushup-nine.vercel.app`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'OnlyPushups Progress',
+          text: shareText,
+        });
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          copyToClipboard(shareText);
+        }
+      }
+    } else {
+      copyToClipboard(shareText);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Progress copied to clipboard!');
+    }).catch(() => {
+      setShowShareModal(true);
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 flex items-center justify-center">
@@ -186,12 +216,20 @@ export default function App() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">OnlyPushups</h1>
-          <button 
-            onClick={() => { setTempGoal(yearlyGoal); setShowSettings(true); }}
-            className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700/50 transition-colors"
-          >
-            <Settings className="w-5 h-5 text-purple-300" />
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={handleShare}
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700/50 transition-colors"
+            >
+              <Share2 className="w-5 h-5 text-purple-300" />
+            </button>
+            <button 
+              onClick={() => { setTempGoal(yearlyGoal); setShowSettings(true); }}
+              className="p-2 rounded-full bg-purple-800/50 hover:bg-purple-700/50 transition-colors"
+            >
+              <Settings className="w-5 h-5 text-purple-300" />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -224,7 +262,7 @@ export default function App() {
               <p className="text-purple-300 text-sm font-medium text-center mb-2">TODAY</p>
               <div className="flex items-center justify-center gap-4">
                 <button 
-                  onClick={() => addPushups(-25)}
+                  onClick={() => addPushups(-5)}
                   className="w-12 h-12 rounded-full bg-purple-700/50 hover:bg-purple-600/50 flex items-center justify-center transition-all active:scale-95"
                 >
                   <Minus className="w-6 h-6 text-white" />
@@ -234,16 +272,16 @@ export default function App() {
                   <p className="text-purple-400 text-sm mt-1">push-ups</p>
                 </div>
                 <button 
-                  onClick={() => addPushups(25)}
+                  onClick={() => addPushups(5)}
                   className="w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-400 flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-purple-500/30"
                 >
                   <Plus className="w-6 h-6 text-white" />
                 </button>
               </div>
               
-              {/* Quick add buttons - increments of 25 */}
+              {/* Quick add buttons */}
               <div className="flex justify-center gap-2 mt-4">
-                {[25, 50, 75, 100].map(num => (
+                {[5, 25, 50, 75, 100].map(num => (
                   <button
                     key={num}
                     onClick={() => addPushups(num)}
@@ -319,6 +357,15 @@ export default function App() {
                 <p className="text-2xl font-bold text-white">{Math.max(0, neededPerDay)}</p>
               </div>
             </div>
+
+            {/* Share Progress Button */}
+            <button
+              onClick={handleShare}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 rounded-xl p-4 text-white font-medium transition-all"
+            >
+              <Share2 className="w-5 h-5" />
+              Share Progress
+            </button>
 
             {/* History Toggle */}
             <button
@@ -467,7 +514,7 @@ export default function App() {
                 <label className="text-purple-300 text-sm font-medium block mb-2">Number of Push-ups</label>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setBacklogCount(Math.max(0, backlogCount - 25))}
+                    onClick={() => setBacklogCount(Math.max(0, backlogCount - 5))}
                     className="w-12 h-12 rounded-full bg-purple-700/50 hover:bg-purple-600/50 flex items-center justify-center transition-all"
                   >
                     <Minus className="w-5 h-5 text-white" />
@@ -479,7 +526,7 @@ export default function App() {
                     className="flex-1 bg-purple-950/50 border border-purple-700/50 rounded-xl px-4 py-3 text-white text-center text-xl font-bold focus:outline-none focus:border-purple-500"
                   />
                   <button
-                    onClick={() => setBacklogCount(backlogCount + 25)}
+                    onClick={() => setBacklogCount(backlogCount + 5)}
                     className="w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-400 flex items-center justify-center transition-all shadow-lg shadow-purple-500/30"
                   >
                     <Plus className="w-5 h-5 text-white" />
@@ -489,7 +536,7 @@ export default function App() {
 
               {/* Quick add buttons */}
               <div className="flex justify-center gap-2 mb-4">
-                {[25, 50, 75, 100].map(num => (
+                {[5, 25, 50, 75, 100].map(num => (
                   <button
                     key={num}
                     onClick={() => setBacklogCount(backlogCount + num)}
@@ -592,6 +639,33 @@ export default function App() {
               >
                 Save Changes
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Share Modal (fallback) */}
+        {showShareModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-gradient-to-br from-purple-900 to-purple-950 rounded-2xl p-6 w-full max-w-sm border border-purple-700/50 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">Share Progress</h2>
+                <button onClick={() => setShowShareModal(false)} className="p-1 rounded-full hover:bg-purple-800">
+                  <X className="w-5 h-5 text-purple-400" />
+                </button>
+              </div>
+              
+              <div className="bg-purple-950/50 rounded-xl p-4 mb-4">
+                <p className="text-purple-200 text-sm whitespace-pre-line">
+                  💪 OnlyPushups Progress{'\n\n'}
+                  🎯 {totalThisYear.toLocaleString()} / {yearlyGoal.toLocaleString()} pushups{'\n'}
+                  📊 {progress.toFixed(1)}% complete{'\n'}
+                  🔥 {streak} day streak{'\n'}
+                  📅 {yearEntries.length} days active{'\n\n'}
+                  Track your pushups at: pushup-nine.vercel.app
+                </p>
+              </div>
+              
+              <p className="text-purple-400 text-sm text-center">Screenshot this card to share!</p>
             </div>
           </div>
         )}
