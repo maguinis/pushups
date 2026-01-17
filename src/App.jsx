@@ -175,7 +175,7 @@ export default function App() {
 
   // Share functionality
   const handleShare = async () => {
-    const shareText = `💪 OnlyPushups Progress\n\n🎯 ${totalThisYear.toLocaleString()} / ${yearlyGoal.toLocaleString()} pushups\n📊 ${progress.toFixed(1)}% complete\n🔥 ${streak} day streak\n📅 ${yearEntries.length} days active\n\nTrack your pushups at: pushup-nine.vercel.app`;
+    const shareText = `💪 OnlyPushups Progress\n\n🎯 ${totalThisYear.toLocaleString()} / ${yearlyGoal.toLocaleString()} pushups\n📊 ${progress.toFixed(1)}% complete\n🔥 ${streak} day streak\n📅 ${yearEntries.length} days active\n\nTrack your pushups at: onlypushups.com`;
     
     if (navigator.share) {
       try {
@@ -661,7 +661,7 @@ export default function App() {
                   📊 {progress.toFixed(1)}% complete{'\n'}
                   🔥 {streak} day streak{'\n'}
                   📅 {yearEntries.length} days active{'\n\n'}
-                  Track your pushups at: pushup-nine.vercel.app
+                  Track your pushups at: onlypushups.com
                 </p>
               </div>
               
